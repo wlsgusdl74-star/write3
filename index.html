@@ -79,7 +79,6 @@
       const [focusedField, setFocusedField] = useState('sentence1');
       const [grammarIssues, setGrammarIssues] = useState([]);
       
-      // 🌟 기자 스타일 가이드 팝업창 상태
       const [showGuideModal, setShowGuideModal] = useState(false);
       const [isConvertingToNews, setIsConvertingToNews] = useState(false);
       
@@ -340,24 +339,15 @@
         }
       };
 
-      // 🌟 [신규 기능] AI를 이용해 일기 말투를 기사 말투로 완벽 변환하기
       const convertToNewsTone = async () => {
         if (!draftText.trim()) return triggerToast('💡 변환할 기사 내용을 먼저 작성해 주세요!');
         if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("여기에")) return triggerToast('⚠️ 코드에 Gemini API 키를 먼저 입력해 주세요!');
 
         setIsConvertingToNews(true);
-        triggerToast('📰 AI 기사 작성 도우미가 '기사 말투'로 다듬고 있어요...');
+        triggerToast('📰 AI 기사 작성 도우미가 기사 말투로 다듬고 있어요...');
 
         try {
-          const promptText = `초등학생이 쓴 아래 글을 다음 [4가지 기자 어투 규칙]에 맞춰 전문적인 '기사 말투'로 변환해 줘. 변환된 기사 본문만 순수하게 출력해 줘.
-
-[4가지 기자 어투 규칙]
-1. 끝맺음은 '~다' 또는 '~었다', '~했다' 같은 명확한 기사체(해라체)로 쓸 것 (~요, ~했어요 절대 금지).
-2. '재밌었다', '멋졌다' 같은 주관적인 감정 표현 대신 객관적인 사실과 현장 분위기로 묘사할 것.
-3. 줄임말, 은어, 유행어 대신 바르고 명확한 표준어를 사용할 것.
-4. 소감이나 인터뷰 내용은 큰따옴표(" ")로 살려줄 것.
-
-원문: "${draftText}"`;
+          const promptText = "초등학생이 쓴 아래 원문을 '기사체'로 변환해 줘. 규칙: 1. 끝맺음은 '~다', '~었다', '~했다' 같은 명확한 해라체로 쓸 것(~요, ~했어요 절대 금지). 2. 주관적인 감정 표현('재밌었다', '멋졌다' 등) 대신 객관적인 사실과 현장 분위기로 묘사할 것. 3. 줄임말, 은어 대신 바른 표준어를 사용할 것. 4. 인터뷰나 소감은 큰따옴표(\" \")로 살릴 것. 변환된 기사 본문만 순수하게 출력해 줘.\n\n원문: " + draftText;
 
           const payload = {
             contents: [{ parts: [{ text: promptText }] }]
@@ -441,7 +431,6 @@
             </div>
           )}
 
-          {/* 🌟 기자 스타일 가이드 및 비교 팝업 모달 */}
           {showGuideModal && (
             <div className="fixed inset-0 z-[80] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-y-auto">
               <div className="bg-white text-slate-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl p-8 my-8 animate-pop-in relative space-y-6">
@@ -452,7 +441,6 @@
                   <h3 className="text-2xl font-black text-slate-900">📰 '일기 말투' vs '기사 말투' 한눈에 보기</h3>
                 </div>
 
-                {/* 4가지 핵심 어투 규칙 */}
                 <div className="space-y-3 text-sm">
                   <div className="bg-slate-50 p-4 rounded-2xl border">
                     <strong className="text-indigo-700 block mb-1">① 끝맺음은 '~다' 또는 '~었다'로 끝내기 (해라체)</strong>
@@ -761,7 +749,6 @@
                         
                         <textarea value={draftText} onFocus={() => setFocusedField('draftText')} onChange={(e) => setDraftText(e.target.value)} placeholder="왼쪽에서 문장을 합치면 이곳에 글이 나타납니다." rows={12} className="w-full p-5 bg-slate-50 rounded-2xl border font-medium text-base leading-loose outline-none shadow-inner resize-none focus:bg-white"/>
 
-                        {/* 🌟 기사체 변환 버튼 */}
                         <button onClick={convertToNewsTone} disabled={isConvertingToNews} className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-sm py-4 rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2">
                           {isConvertingToNews ? (
                             <>
