@@ -349,6 +349,16 @@
         }, 500);
       };
 
+      // 🌟 2단계에서 3단계로 넘어갈 때 5줄 내용을 합쳐서 draftText에 자동 반영
+      const goToStep3 = () => {
+        const lines = [line1, line2, line3, line4, line5].filter(s => s && s.trim() !== '');
+        if (lines.length > 0 && (!draftText || draftText.trim() === '')) {
+          setDraftText(lines.join('\n\n'));
+        }
+        setStep(3);
+        triggerToast('🚀 3단계(마무리 및 다듬기)로 이동했습니다!');
+      };
+
       const combineFiveLines = () => {
         const lines = [line1, line2, line3, line4, line5].filter(s => s && s.trim() !== '');
         if (lines.length === 0) return triggerToast('💡 내용을 하나 이상 입력해 주세요!');
@@ -405,7 +415,6 @@
         triggerToast('💮 맞춤법이 바르게 고쳐졌습니다!');
       };
 
-      // 🌟 엑셀(CSV) 다운로드 함수 (줄1~줄5 컬럼 데이터 순서 정확히 일치화)
       const downloadCSV = () => {
         const myClassData = teacherDataList.filter(row => row.targetTeacher === loggedInTeacher);
         if (myClassData.length === 0) return triggerToast('⚠️ 다운로드할 우리 반 데이터가 없습니다.');
@@ -432,6 +441,7 @@
             </div>
           )}
 
+          {/* 🌟 팝업 글쓰기 팁 (기사글 특징 안내 반영) */}
           {showGuideModal && (
             <div className="fixed inset-0 z-[80] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-y-auto">
               <div className="bg-white text-slate-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl p-8 my-8 animate-pop-in relative space-y-6">
@@ -439,13 +449,25 @@
 
                 <div className="text-center border-b pb-4">
                   <div className="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full inline-block mb-1">기자 글쓰기 가이드</div>
-                  <h3 className="text-2xl font-black text-slate-900">📰 5줄 풍부한 기사 쓰기 팁</h3>
+                  <h3 className="text-2xl font-black text-slate-900">📰 기사글의 4가지 특징</h3>
                 </div>
 
                 <div className="space-y-3 text-sm">
                   <div className="bg-slate-50 p-4 rounded-2xl border">
-                    <strong className="text-indigo-700 block mb-1">① 구체적인 사실 적기</strong>
-                    <p className="text-xs text-slate-600">"재밌었다" 대신 "모둠원들과 역할을 나누어 끝까지 완성했다"처럼 구체적으로 써보세요.</p>
+                    <strong className="text-indigo-700 block mb-1">① 끝맺음은 '~다' 또는 '~었다'로 끝내기 (해라체)</strong>
+                    <p className="text-xs text-slate-600">존댓말(~했어요, ~합니다)이나 대화체(~했단다) 대신 담담하고 명확하게 끝을 맺습니다.</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border">
+                    <strong className="text-indigo-700 block mb-1">② 내 감정/생각 대신 '일어난 사실'로 표현하기</strong>
+                    <p className="text-xs text-slate-600">'재밌었다', '멋졌다' 같은 주관적인 감정 대신 현장의 행동과 분위기를 사실적으로 묘사합니다.</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border">
+                    <strong className="text-indigo-700 block mb-1">③ 줄임말·유행어 대신 바르고 명확한 단어 쓰기</strong>
+                    <p className="text-xs text-slate-600">친구들과 쓰는 은어, 줄임말, 이모티콘은 배제하고 바른 표준어를 사용합니다.</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border">
+                    <strong className="text-indigo-700 block mb-1">④ 다른 사람의 말은 "큰따옴표"로 살려주기</strong>
+                    <p className="text-xs text-slate-600">본문은 '~다'로 쓰되, 인터뷰한 친구나 선생님의 말씀은 큰따옴표로 그대로 적어줍니다.</p>
                   </div>
                 </div>
 
@@ -540,7 +562,7 @@
                 <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-3 gap-3 text-center">
                   <button onClick={() => setStep(1)} className={`p-3.5 rounded-2xl font-extrabold text-sm cursor-pointer transition-all ${step === 1 ? 'bg-amber-500 text-white shadow-lg scale-[1.02]' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>1단계: 육하원칙</button>
                   <button onClick={() => setStep(2)} className={`p-3.5 rounded-2xl font-extrabold text-sm cursor-pointer transition-all ${step === 2 ? 'bg-indigo-600 text-white shadow-lg scale-[1.02]' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>2단계: 5줄 내용 풍부하게 작성</button>
-                  <button onClick={() => setStep(3)} className={`p-3.5 rounded-2xl font-extrabold text-sm cursor-pointer transition-all ${step === 3 ? 'bg-emerald-600 text-white shadow-lg scale-[1.02]' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>3단계: 마무리 및 다듬기</button>
+                  <button onClick={goToStep3} className={`p-3.5 rounded-2xl font-extrabold text-sm cursor-pointer transition-all ${step === 3 ? 'bg-emerald-600 text-white shadow-lg scale-[1.02]' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>3단계: 마무리 및 다듬기</button>
                 </div>
 
                 {step === 1 && (
@@ -657,7 +679,7 @@
                         </div>
                         <div className="flex gap-3 pt-2">
                           <button onClick={() => setStep(1)} className="w-1/3 bg-slate-200 text-slate-700 py-4 rounded-2xl font-black text-base cursor-pointer">👈 1단계</button>
-                          <button onClick={() => setStep(3)} className="w-2/3 bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg cursor-pointer">3단계(다듬기)로 이동 👉</button>
+                          <button onClick={goToStep3} className="w-2/3 bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg cursor-pointer">3단계(다듬기)로 이동 👉</button>
                         </div>
                       </div>
                     </div>
