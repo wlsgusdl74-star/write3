@@ -42,12 +42,6 @@
 
     const { useState, useEffect, useRef } = React;
 
-    const EXPANSION_QUESTIONS = [
-      '💡 그 활동을 할 때 마음이나 기분은 어땠나요?',
-      '💡 가장 재미있거나 기억에 남는 장면은 무엇이었나요?',
-      '💡 같이 한 친구나 선생님에게 전하고 싶은 말은 무엇인가요?'
-    ];
-
     const MOOD_OPTIONS = ['😊 신나고 즐거워요', '🥰 뿌듯하고 행복해요', '🤔 신기하고 재미있어요', '😌 편안하고 유익해요', '🔥 의욕이 넘쳐요'];
 
     function App() {
@@ -69,13 +63,14 @@
       const [step, setStep] = useState(1);
       
       const [w6, setW6] = useState({ who: '', when: '', where: '', what: '', how: '', why: '' });
-      const [sentence1, setSentence1] = useState('');
-      const [sentence2, setSentence2] = useState('');
-      const [sentence3, setSentence3] = useState('');
-      const [sentence4, setSentence4] = useState('');
-      const [selectedQuestion, setSelectedQuestion] = useState(EXPANSION_QUESTIONS[0]);
+      
+      const [line1, setLine1] = useState(''); 
+      const [line2, setLine2] = useState(''); 
+      const [line3, setLine3] = useState(''); 
+      const [line4, setLine4] = useState(''); 
+      const [line5, setLine5] = useState(''); 
+      
       const [draftText, setDraftText] = useState('');
-      const [focusedField, setFocusedField] = useState('sentence1');
       const [grammarIssues, setGrammarIssues] = useState([]);
       
       const [showGuideModal, setShowGuideModal] = useState(false);
@@ -272,10 +267,10 @@
           mood: mood, 
           shortMsg: shortMsg,
           w6: w6, 
-          sentence1: sentence1, 
-          sentence2: sentence2, 
-          sentence3: sentence3, 
-          sentence4: sentence4, 
+          sentence1: line1, 
+          sentence2: line2, 
+          sentence3: line3, 
+          sentence4: line4, 
           draftText: draftText,
           targetTeacher: finalTeacher 
         };
@@ -294,7 +289,7 @@
             setActivityTitle('');
             setShortMsg('');
             setW6({ who: '', when: '', where: '', what: '', how: '', why: '' });
-            setSentence1(''); setSentence2(''); setSentence3(''); setSentence4('');
+            setLine1(''); setLine2(''); setLine3(''); setLine4(''); setLine5('');
             setDraftText('');
             setStep(1);
           } else {
@@ -344,37 +339,25 @@
         }, 500);
       };
 
-      const insertWordChip = (word) => {
-        if (!word) return;
-        const addSpace = (prev) => (prev ? `${prev.trim()} ${word}` : word);
-        if (focusedField === 'sentence1') setSentence1(addSpace);
-        else if (focusedField === 'sentence2') setSentence2(addSpace);
-        else if (focusedField === 'sentence3') setSentence3(addSpace);
-        else if (focusedField === 'sentence4') setSentence4(addSpace);
-        else if (focusedField === 'draftText') setDraftText(addSpace);
-        triggerToast(`✨ "${word}" 단어를 넣었습니다!`);
-      };
-
-      const combineSentences = () => {
-        const combined = [sentence1, sentence2, sentence3, sentence4].map(s => s.trim()).filter(Boolean).join(' ');
-        if (!combined) return triggerToast('💡 문장을 하나 이상 입력해 주세요!');
-        setDraftText(combined);
-        triggerToast('🎉 문장들이 연결되었습니다!');
+      const combineFiveLines = () => {
+        const lines = [line1, line2, line3, line4, line5].map(s => s.trim()).filter(Boolean);
+        if (lines.length === 0) return triggerToast('💡 내용을 하나 이상 입력해 주세요!');
+        setDraftText(lines.join(' '));
+        triggerToast('🎉 5줄 기사 글이 풍부하게 합쳐졌습니다!');
       };
 
       const scanGrammar = () => {
         triggerToast('🔍 맞춤법을 검사하고 있습니다...');
         let issues = [];
-        if (draftText.includes('떡뽂이')) issues.push({ id: 'g1', errorWord: '떡뽂이', correct: '떡볶이', options: ['떡뽂이', '떡볶이'], desc: "'볶다'에서 온 말이므로 '떡볶이'가 바른 표현이에요!" });
-        if (draftText.includes('맛있엇다')) issues.push({ id: 'g2', errorWord: '맛있엇다', correct: '맛있었다', options: ['맛있엇다', '맛있었다'], desc: "지난 일은 쌍시옷(ㅆ)을 써서 '맛있었다'로 써요!" });
-        if (issues.length === 0) issues.push({ id: 'g3', errorWord: '참 재밌엇다', correct: '참 재미있었다', options: ['참 재밌엇다', '참 재미있었다'], desc: "'재미있었다'로 바르게 고쳐주세요!" });
+        if (draftText.includes('떡뽂이')) issues.push({ id: 'g1', errorWord: '떡뽂이', correct: '떡볶이', desc: "'볶다'에서 온 말이므로 '떡볶이'가 바른 표현이에요!" });
+        if (draftText.includes('맛있엇다')) issues.push({ id: 'g2', errorWord: '맛있엇다', correct: '맛있었다', desc: "지난 일은 쌍시옷(ㅆ)을 써서 '맛있었다'로 써요!" });
+        if (issues.length === 0) issues.push({ id: 'g3', errorWord: '참 재밌엇다', correct: '참 재미있었다', desc: "'재미있었다'로 바르게 고쳐주세요!" });
         setGrammarIssues(issues);
       };
 
-      const resolveIssue = (issueId, selected, correct) => {
-        if (selected !== correct) return triggerToast('💡 다시 한번 생각해보세요!');
-        setDraftText((prev) => prev.replace(/떡뽂이/g, correct)); 
-        setGrammarIssues((prev) => prev.map((item) => item.id === issueId ? { ...item, resolved: true } : item));
+      const resolveIssue = (issueId, correct) => {
+        setDraftText((prev) => prev.replace(/참 재밌엇다/g, correct)); 
+        setGrammarIssues((prev) => prev.filter(i => i.id !== issueId));
         triggerToast('💮 정답 도장이 찍혔습니다!');
       };
 
@@ -382,10 +365,10 @@
         const myClassData = teacherDataList.filter(row => row.targetTeacher === loggedInTeacher);
         if (myClassData.length === 0) return triggerToast('⚠️ 다운로드할 우리 반 데이터가 없습니다.');
         
-        let csvContent = '\uFEFF응답 일시,이름,기분,한 줄 메시지,기사 주제,누가,언제,어디서,무엇을,어떻게,왜,최종기사문\n';
+        let csvContent = '\uFEFF응답 일시,이름,기분,한 줄 메시지,기사 주제,줄1,줄2,줄3,줄4,줄5,최종기사문\n';
         myClassData.forEach((row) => {
           const safe = (txt) => `"${(txt || '').toString().replace(/"/g, '""')}"`;
-          csvContent += `${safe(row.timestamp)},${safe(row.name)},${safe(row.mood)},${safe(row.shortMsg)},${safe(row.activityTitle)},${safe(row.w6?.who)},${safe(row.w6?.when)},${safe(row.w6?.where)},${safe(row.w6?.what)},${safe(row.w6?.how)},${safe(row.w6?.why)},${safe(row.draftText)}\n`;
+          csvContent += `${safe(row.timestamp)},${safe(row.name)},${safe(row.mood)},${safe(row.shortMsg)},${safe(row.activityTitle)},${safe(row.sentence1)},${safe(row.sentence2)},${safe(row.sentence3)},${safe(row.sentence4)},${safe(row.draftText)}\n`;
         });
         const url = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
         const a = document.createElement('a');
@@ -411,13 +394,13 @@
 
                 <div className="text-center border-b pb-4">
                   <div className="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full inline-block mb-1">기자 글쓰기 가이드</div>
-                  <h3 className="text-2xl font-black text-slate-900">📰 '일기 말투' vs '기사 말투' 한눈에 보기</h3>
+                  <h3 className="text-2xl font-black text-slate-900">📰 5줄 풍부한 기사 쓰기 팁</h3>
                 </div>
 
                 <div className="space-y-3 text-sm">
                   <div className="bg-slate-50 p-4 rounded-2xl border">
-                    <strong className="text-indigo-700 block mb-1">① 끝맺음은 '~다' 또는 '~었다'로 끝내기 (해라체)</strong>
-                    <p className="text-xs text-slate-600">존댓말(~했어요, ~합니다)이나 대화체(~했단다) 대신 담담하고 명확하게 끝을 맺습니다.</p>
+                    <strong className="text-indigo-700 block mb-1">① 구체적인 사실 적기</strong>
+                    <p className="text-xs text-slate-600">"재밌었다" 대신 "모둠원들과 역할을 나누어 끝까지 완성했다"처럼 구체적으로 써보세요.</p>
                   </div>
                 </div>
 
@@ -509,10 +492,11 @@
                   </select>
                 </div>
 
+                {/* 🌟 1, 2, 3단계 직접 클릭해서 이동할 수 있는 상단 탭 버튼 */}
                 <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-3 gap-3 text-center">
-                  <button onClick={() => setStep(1)} className={`p-3.5 rounded-2xl font-extrabold text-sm ${step === 1 ? 'bg-amber-500 text-white shadow-lg' : 'bg-slate-100 text-slate-500'}`}>1단계: 육하원칙</button>
-                  <button onClick={() => setStep(2)} className={`p-3.5 rounded-2xl font-extrabold text-sm ${step === 2 ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-100 text-slate-500'}`}>2단계: 내용 풍부하게 작성</button>
-                  <button onClick={() => setStep(3)} className={`p-3.5 rounded-2xl font-extrabold text-sm ${step === 3 ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-100 text-slate-500'}`}>3단계: 마무리 및 다듬기</button>
+                  <button onClick={() => setStep(1)} className={`p-3.5 rounded-2xl font-extrabold text-sm cursor-pointer transition-all ${step === 1 ? 'bg-amber-500 text-white shadow-lg scale-[1.02]' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>1단계: 육하원칙</button>
+                  <button onClick={() => setStep(2)} className={`p-3.5 rounded-2xl font-extrabold text-sm cursor-pointer transition-all ${step === 2 ? 'bg-indigo-600 text-white shadow-lg scale-[1.02]' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>2단계: 5줄 내용 풍부하게 작성</button>
+                  <button onClick={() => setStep(3)} className={`p-3.5 rounded-2xl font-extrabold text-sm cursor-pointer transition-all ${step === 3 ? 'bg-emerald-600 text-white shadow-lg scale-[1.02]' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>3단계: 마무리 및 다듬기</button>
                 </div>
 
                 {step === 1 && (
@@ -534,66 +518,70 @@
                       ))}
                     </div>
                     <div className="flex justify-end pt-5">
-                      <button onClick={() => setStep(2)} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl cursor-pointer">2단계(내용 풍부하게 작성)로 이동 👉</button>
+                      <button onClick={() => setStep(2)} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl cursor-pointer">2단계(5줄 내용 작성)로 이동 👉</button>
                     </div>
                   </div>
                 )}
 
-                {/* 🌟 2단계: 내용 풍부하게 작성하기 */}
+                {/* 🌟 2단계: 5줄 내용 풍부하게 작성하기 */}
                 {step === 2 && (
                   <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
                     <div className="flex justify-between items-center border-b pb-4">
-                      <h2 className="text-2xl font-black text-slate-900"><span className="text-indigo-600 mr-2">2단계.</span> 내용을 풍부하게 작성해요!</h2>
-                      <button onClick={() => setShowGuideModal(true)} className="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200 cursor-pointer">💡 글쓰기 가이드</button>
+                      <h2 className="text-2xl font-black text-slate-900"><span className="text-indigo-600 mr-2">2단계.</span> 5줄 기사 내용 풍부하게 작성하기</h2>
+                      <button onClick={() => setShowGuideModal(true)} className="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200 cursor-pointer">💡 글쓰기 팁</button>
                     </div>
 
-                    <div className="bg-indigo-50 p-4 rounded-2xl text-xs font-bold text-indigo-900">
-                      1단계에서 적은 단어 상자를 클릭해 문장들을 채우고, 활동 당시의 생생한 느낌과 생각을 자세히 더해 글을 풍부하게 만들어보세요!
+                    <div className="bg-indigo-50 p-4 rounded-2xl text-xs font-bold text-indigo-900 space-y-1">
+                      <p>✨ 1단계 단어를 참고하여 아래 **5개의 줄**에 생각을 자세히 적어보세요. 최소 5줄 이상으로 길게 쓰면 멋진 기사가 완성됩니다!</p>
                     </div>
 
-                    <div className="space-y-2">
-                      <span className="text-xs font-black text-slate-600">✨ 단어 상자 (클릭하면 쏙 들어갑니다!)</span>
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                        {Object.keys(w6).map((k) => (
-                          <button key={k} onClick={() => insertWordChip(w6[k])} disabled={!w6[k]} className={`p-2.5 rounded-xl border font-bold text-xs truncate ${w6[k] ? 'bg-indigo-50 border-indigo-200 cursor-pointer text-indigo-900' : 'bg-slate-50 text-slate-400'}`}>
-                            {w6[k] || '미입력'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4 bg-amber-50 p-6 rounded-3xl border border-amber-200">
-                        <div className="flex justify-between items-center text-xs font-black text-amber-900">
-                          <span>✏️ 작성 중인 칸: {focusedField}</span>
-                        </div>
-                        <input type="text" value={sentence1} onFocus={() => setFocusedField('sentence1')} onChange={(e) => setSentence1(e.target.value)} placeholder="1번 문장 (언제, 어디서, 누가)" className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                        <input type="text" value={sentence2} onFocus={() => setFocusedField('sentence2')} onChange={(e) => setSentence2(e.target.value)} placeholder="2번 문장 (무엇을, 어떻게)" className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                        <input type="text" value={sentence3} onFocus={() => setFocusedField('sentence3')} onChange={(e) => setSentence3(e.target.value)} placeholder="3번 문장 (왜, 느낌)" className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                        
-                        <div className="bg-purple-100 p-3 rounded-xl space-y-2">
-                          <div className="flex justify-between text-xs font-bold text-purple-900">
-                            <span>{selectedQuestion}</span>
-                            <button onClick={() => setSelectedQuestion(EXPANSION_QUESTIONS[(EXPANSION_QUESTIONS.indexOf(selectedQuestion)+1)%EXPANSION_QUESTIONS.length])} className="underline cursor-pointer">질문 변경</button>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-xs font-black text-amber-900 block mb-1">줄 1 [시작]: 언제, 어디서, 누가 무엇을 했나요?</label>
+                            <input type="text" value={line1} onChange={(e) => setLine1(e.target.value)} placeholder="예: 어제 우리 반은 교실에서 신나는 요리 활동을 시작했다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
                           </div>
-                          <input type="text" value={sentence4} onFocus={() => setFocusedField('sentence4')} onChange={(e) => setSentence4(e.target.value)} placeholder="생각을 더 자세히 적어보세요." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
+
+                          <div>
+                            <label className="text-xs font-black text-amber-900 block mb-1">줄 2 [과정]: 어떻게 진행되었나요?</label>
+                            <input type="text" value={line2} onChange={(e) => setLine2(e.target.value)} placeholder="예: 모둠별로 재료를 손질하고 순서에 맞춰 정성껏 만들었다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-black text-amber-900 block mb-1">줄 3 [하이라이트]: 가장 인상 깊은 장면은 무엇인가요?</label>
+                            <input type="text" value={line3} onChange={(e) => setLine3(e.target.value)} placeholder="예: 완성된 음식을 맛보며 친구들과 환하게 웃음 지었다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-black text-amber-900 block mb-1">줄 4 [소감]: 새롭게 느낀 점이나 배운 점은 무엇인가요?</label>
+                            <input type="text" value={line4} onChange={(e) => setLine4(e.target.value)} placeholder="예: 협동하는 과정의 즐거움을 깊이 깨닫게 되었다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-black text-amber-900 block mb-1">줄 5 [마무리]: 앞으로의 다짐이나 한마디!</label>
+                            <input type="text" value={line5} onChange={(e) => setLine5(e.target.value)} placeholder="예: 다음에도 다 함께 참여하는 활동이 기다려진다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
+                          </div>
                         </div>
                         
-                        <button onClick={combineSentences} className="w-full bg-slate-900 text-white font-black py-3.5 rounded-xl cursor-pointer">✨ 문장들을 하나로 합치기 👉</button>
+                        <button onClick={combineFiveLines} className="w-full bg-slate-900 text-white font-black py-4 rounded-xl cursor-pointer shadow-md">✨ 5줄 내용을 풍부하게 하나로 합치기 👉</button>
                       </div>
 
                       <div className="space-y-4 bg-slate-50 p-6 rounded-3xl border flex flex-col justify-between">
                         <div className="space-y-3">
-                          <span className="font-black text-sm text-slate-800">📝 합쳐진 글 초안</span>
-                          <textarea value={draftText} onFocus={() => setFocusedField('draftText')} onChange={(e) => setDraftText(e.target.value)} placeholder="왼쪽에서 문장을 합치면 이곳에 글이 풍부하게 나타납니다." rows={10} className="w-full p-4 bg-white rounded-2xl border font-medium text-sm leading-relaxed outline-none resize-none" />
+                          <span className="font-black text-sm text-slate-800">📝 완성된 5줄 기사 초안 미리보기</span>
+                          <textarea value={draftText} onChange={(e) => setDraftText(e.target.value)} placeholder="왼쪽에서 5줄을 작성하고 합치기 버튼을 누르면 이곳에 풍부한 기사글이 나타납니다." rows={12} className="w-full p-4 bg-white rounded-2xl border font-medium text-sm leading-relaxed outline-none resize-none" />
                         </div>
-                        <button onClick={() => setStep(3)} className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg cursor-pointer">3단계(마무리 및 다듬기)로 이동 👉</button>
+                        <div className="flex gap-3">
+                          <button onClick={() => setStep(1)} className="w-1/3 bg-slate-200 text-slate-700 py-4 rounded-2xl font-black text-base cursor-pointer">👈 1단계</button>
+                          <button onClick={() => setStep(3)} className="w-2/3 bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg cursor-pointer">3단계(다듬기)로 이동 👉</button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 🌟 3단계: 마무리 및 다듬기 (기사 말투 자동 변환 + 맞춤법 검사 + 제목 추천 모여있음) */}
+                {/* 🌟 3단계: 마무리 및 다듬기 */}
                 {step === 3 && (
                   <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-md space-y-8">
                     <div className="flex justify-between items-center border-b pb-5">
@@ -628,8 +616,8 @@
                     </div>
 
                     <div className="space-y-2">
-                      <span className="text-xs font-extrabold text-slate-500">최종 완성된 기사문</span>
-                      <textarea value={draftText} onChange={(e) => setDraftText(e.target.value)} rows={6} className="w-full p-5 bg-slate-50 rounded-2xl border font-bold text-base leading-relaxed outline-none" />
+                      <span className="text-xs font-extrabold text-slate-500">최종 완성된 5줄 기사문</span>
+                      <textarea value={draftText} onChange={(e) => setDraftText(e.target.value)} rows={8} className="w-full p-5 bg-slate-50 rounded-2xl border font-bold text-base leading-relaxed outline-none" />
                     </div>
 
                     {grammarIssues.length > 0 && (
@@ -638,18 +626,21 @@
                         {grammarIssues.map((issue) => (
                           <div key={issue.id} className="bg-white p-3 rounded-xl border flex justify-between items-center text-xs">
                             <span>"{issue.errorWord}" &rarr; <strong className="text-emerald-600">{issue.correct}</strong></span>
-                            <button onClick={() => resolveIssue(issue.id, issue.correct, issue.correct)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer">적용하기</button>
+                            <button onClick={() => resolveIssue(issue.id, issue.correct)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer">적용하기</button>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-200 space-y-4">
-                      <h3 className="font-black text-indigo-900">📮 기사 최종 제출하기</h3>
-                      <input type="text" value={shortMsg} onChange={(e) => setShortMsg(e.target.value)} placeholder="한 줄 소감 (예: 기사를 완성해서 뿌듯하다!)" className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                      <button onClick={handleSaveToSpreadsheet} disabled={isLoading} className="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-xl cursor-pointer">
-                        {isLoading ? '제출 중...' : '🚀 기사 최종 제출하기'}
-                      </button>
+                    <div className="flex gap-4">
+                      <button onClick={() => setStep(2)} className="w-1/3 bg-slate-200 text-slate-700 py-4 rounded-2xl font-black text-base cursor-pointer">👈 2단계로 이동</button>
+                      <div className="w-2/3 bg-indigo-50 p-6 rounded-3xl border border-indigo-200 space-y-4">
+                        <h3 className="font-black text-indigo-900">📮 기사 최종 제출하기</h3>
+                        <input type="text" value={shortMsg} onChange={(e) => setShortMsg(e.target.value)} placeholder="한 줄 소감" className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
+                        <button onClick={handleSaveToSpreadsheet} disabled={isLoading} className="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-xl cursor-pointer">
+                          {isLoading ? '제출 중...' : '🚀 기사 최종 제출하기'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
