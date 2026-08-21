@@ -593,7 +593,7 @@
                   </div>
                 )}
 
-                {/* 🌟 3단계: 마무리 및 다듬기 (기사 말투 자동 변환 + 맞춤법 검사 + 제목 추천) */}
+                {/* 🌟 3단계: 마무리 및 다듬기 (기사 말투 자동 변환 + 맞춤법 검사 + 제목 추천 모여있음) */}
                 {step === 3 && (
                   <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-md space-y-8">
                     <div className="flex justify-between items-center border-b pb-5">
@@ -637,7 +637,7 @@
                         <h4 className="text-xs font-black text-amber-800">💡 맞춤법 교정</h4>
                         {grammarIssues.map((issue) => (
                           <div key={issue.id} className="bg-white p-3 rounded-xl border flex justify-between items-center text-xs">
-                            <span>"{issue.errorWord}" -> <strong className="text-emerald-600">{issue.correct}</strong></span>
+                            <span>"{issue.errorWord}" &rarr; <strong className="text-emerald-600">{issue.correct}</strong></span>
                             <button onClick={() => resolveIssue(issue.id, issue.correct, issue.correct)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer">적용하기</button>
                           </div>
                         ))}
