@@ -40,8 +40,8 @@
   <script type="text/babel">
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHFQIAmMj-fRxn3yYtX97sfIrn5jdwKM2VgEg0dXOg9PJh3jQhiC7Fc3o4vA3wGAtwAw/exec"; 
     
-    // 🌟 쌍따옴표 안에 선생님의 Gemini API 키를 넣으시면 됩니다! (예: "AIzaSy...")
-    const GEMINI_API_KEY = "여기에_선생님의_API키를_넣어주세요"; 
+    // 🌟 선생님의 API 키가 안전하게 적용되었습니다!
+    const GEMINI_API_KEY = "AQ.Ab8RN6KBbvNmL3WUMvNppmIvYJ3STcPu7ZCryktfiEGDOgRNdQ"; 
 
     const { useState, useEffect, useRef } = React;
 
@@ -312,7 +312,6 @@
 
       const handleGenerateTitles = async () => {
         if (!draftText || draftText.trim() === '') return triggerToast('💡 먼저 기사 내용을 완성해주세요!');
-        if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("여기에")) return triggerToast('⚠️ 코드 상단의 GEMINI_API_KEY에 올바른 키를 입력해 주세요!');
 
         setIsGeneratingTitle(true);
         triggerToast('🤖 AI 도우미가 제목을 고민하고 있어요...');
@@ -343,7 +342,6 @@
 
       const convertToNewsTone = async () => {
         if (!draftText.trim()) return triggerToast('💡 변환할 기사 내용을 먼저 작성해 주세요!');
-        if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("여기에")) return triggerToast('⚠️ 코드 상단의 GEMINI_API_KEY에 올바른 키를 입력해 주세요!');
 
         setIsConvertingToNews(true);
         triggerToast('📰 AI 기사 작성 도우미가 기사 말투로 다듬고 있어요...');
