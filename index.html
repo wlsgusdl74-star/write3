@@ -81,8 +81,6 @@
       
       const [showGuideModal, setShowGuideModal] = useState(false);
       const [isConvertingToNews, setIsConvertingToNews] = useState(false);
-      
-      // 🌟 단어 나열 변환 로딩 상태
       const [isGeneratingFromW6, setIsGeneratingFromW6] = useState(false);
       
       const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
@@ -372,7 +370,6 @@
         }
       };
 
-      // 🌟 [신규 추가] 육하원칙 단어 나열을 문장으로 자동 변환하기
       const generateSentencesFromW6 = async () => {
         const hasInput = Object.values(w6).some(v => v.trim() !== '');
         if (!hasInput) return triggerToast('💡 1단계 육하원칙 단어를 먼저 채워주세요!');
@@ -723,7 +720,6 @@
                           1단계에서 단어들만 툭툭 적어두셨나요? 아래 버튼을 누르면 AI가 단어들을 연결해 멋진 기사 문장으로 한 번에 바꿔줍니다!
                         </p>
                         
-                        {/* 🌟 육하원칙 단어를 문장으로 변환하는 버튼 */}
                         <button onClick={generateSentencesFromW6} disabled={isGeneratingFromW6} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm py-3.5 rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2">
                           {isGeneratingFromW6 ? (
                             <>
