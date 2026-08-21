@@ -349,7 +349,6 @@
         }, 500);
       };
 
-      // 🌟 2단계에서 3단계로 넘어갈 때 5줄 내용을 합쳐서 draftText에 자동 반영
       const goToStep3 = () => {
         const lines = [line1, line2, line3, line4, line5].filter(s => s && s.trim() !== '');
         if (lines.length > 0 && (!draftText || draftText.trim() === '')) {
@@ -366,19 +365,38 @@
         triggerToast('🎉 5줄 기사 초안이 줄별로 멋지게 완성되었습니다!');
       };
 
+      // 🌟 1번 수정사항: 학생이 쓴 원래 내용을 존중하면서 기사체(~다, 매끄러운 연결)만 살짝 풍부하게 다듬어 반영
       const enrichLine = (lineNum) => {
-        if (lineNum === 1) {
-          setLine1(w6.when && w6.where && w6.who ? `${w6.when} ${w6.where}에서 ${w6.who} 함께 모여 뜻깊은 활동을 시작하였다.` : '지난 날 우리 반은 교실에 모여 즐거운 활동을 본격적으로 시작했다.');
-        } else if (lineNum === 2) {
-          setLine2(w6.what && w6.how ? `${w6.what}을 주제로 삼아 ${w6.how} 과정을 거쳐 정성껏 진행했다.` : '모둠별로 역할을 나누어 맡은 바 최선을 다하며 차근차근 진행하였다.');
-        } else if (lineNum === 3) {
-          setLine3('활동이 진행되는 동안 교실 안에는 웃음꽃이 피어났고 모두가 적극적으로 참여하였다.');
-        } else if (lineNum === 4) {
-          setLine4('비록 조금 힘들기도 했지만 친구들과 서로 도우며 끝까지 해내어 큰 보람을 느꼈다.');
-        } else if (lineNum === 5) {
-          setLine5('이번 경험을 바탕으로 앞으로의 학교생활도 더욱 즐겁고 알차게 보내고 싶다.');
+        let currentVal = '';
+        if (lineNum === 1) currentVal = line1;
+        else if (lineNum === 2) currentVal = line2;
+        else if (lineNum === 3) currentVal = line3;
+        else if (lineNum === 4) currentVal = line4;
+        else if (lineNum === 5) currentVal = line5;
+
+        if (!currentVal.trim()) {
+          return triggerToast(`⚠️ 줄 ${lineNum}에 먼저 내용을 적어주세요!`);
         }
-        triggerToast(`✨ 줄 ${lineNum}의 문장이 풍부하게 확장되었습니다!`);
+
+        // 학생이 쓴 내용 뒤에 자연스러운 기사 어미를 붙여주거나 살을 덧붙임
+        let enriched = currentVal.trim();
+        if (!enriched.endsWith('.') && !enriched.endsWith('다') && !enriched.endsWith('요')) {
+          enriched += '다.';
+        } else {
+          enriched = enriched.replace(/요([.!?]|$)/g, '다$1').replace(/어요([.!?]|$)/g, '었다$1');
+        }
+
+        if (lineNum === 1 && !enriched.includes('시작')) enriched += ' 본격적인 활동이 시작되었다.';
+        else if (lineNum === 3 && !enriched.includes('장면')) enriched += ' 가장 기억에 남는 순간이었다.';
+        else if (lineNum === 4 && !enriched.includes('보람')) enriched += ' 친구들과 함께여서 더욱 뜻깊은 시간이었다.';
+
+        if (lineNum === 1) setLine1(enriched);
+        else if (lineNum === 2) setLine2(enriched);
+        else if (lineNum === 3) setLine3(enriched);
+        else if (lineNum === 4) setLine4(enriched);
+        else if (lineNum === 5) setLine5(enriched);
+
+        triggerToast(`✨ 학생이 쓴 원래 내용을 바탕으로 줄 ${lineNum}을 풍부하게 다듬었습니다!`);
       };
 
       const scanGrammar = () => {
@@ -441,7 +459,6 @@
             </div>
           )}
 
-          {/* 🌟 팝업 글쓰기 팁 (기사글 특징 안내 반영) */}
           {showGuideModal && (
             <div className="fixed inset-0 z-[80] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-y-auto">
               <div className="bg-white text-slate-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl p-8 my-8 animate-pop-in relative space-y-6">
@@ -667,7 +684,7 @@
                                 <div className="flex justify-between items-center text-xs">
                                   <span className="font-black text-indigo-600">[{item.label}]</span>
                                   <button onClick={() => enrichLine(item.num)} className="text-[11px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded-lg border border-purple-200 cursor-pointer">
-                                    ✨ 더 풍부하게 다듬기
+                                    ✨ 학생 내용 반영하여 다듬기
                                   </button>
                                 </div>
                                 <p className={`text-xs font-bold ${item.val ? 'text-slate-800' : 'text-slate-400 italic'}`}>
@@ -686,6 +703,7 @@
                   </div>
                 )}
 
+                {/* 🌟 3단계: 맞춤법 검사기 직접 수정(입력) 및 적용 기능 반영 */}
                 {step === 3 && (
                   <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-md space-y-8">
                     <div className="flex justify-between items-center border-b pb-5">
@@ -720,13 +738,13 @@
                     </div>
 
                     <div className="space-y-2">
-                      <span className="text-xs font-extrabold text-slate-500">최종 완성된 5줄 기사문</span>
+                      <span className="text-xs font-extrabold text-slate-500">최종 완성된 5줄 기사문 (직접 수정도 가능합니다)</span>
                       <textarea value={draftText} onChange={(e) => setDraftText(e.target.value)} rows={8} className="w-full p-5 bg-slate-50 rounded-2xl border font-bold text-base leading-relaxed outline-none" />
                     </div>
 
                     {grammarIssues.length > 0 && (
                       <div className="bg-amber-50 p-5 rounded-2xl border border-amber-200 space-y-3">
-                        <h4 className="text-xs font-black text-amber-800">💡 맞춤법 교정 대상 목록</h4>
+                        <h4 className="text-xs font-black text-amber-800">💡 맞춤법 교정 대상 목록 (클릭하여 자동 적용하거나 위 칸에서 직접 고치세요)</h4>
                         {grammarIssues.map((issue) => (
                           <div key={issue.id} className="bg-white p-3.5 rounded-xl border flex justify-between items-center text-xs shadow-sm">
                             <span>본문 속 <strong>"{issue.errorWord}"</strong> &rarr; <strong className="text-emerald-600">{issue.correct}</strong> (으)로 수정</span>
