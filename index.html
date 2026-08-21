@@ -280,6 +280,7 @@
           sentence2: line2, 
           sentence3: line3, 
           sentence4: line4, 
+          sentence5: line5, 
           draftText: draftText,
           targetTeacher: finalTeacher 
         };
@@ -328,7 +329,6 @@
         }, 500);
       };
 
-      // 🌟 3단계: 기사 말투 자동 변환기 정상 작동 로직
       const convertToNewsTone = () => {
         if (!draftText.trim()) return triggerToast('💡 변환할 기사 내용을 먼저 작성해 주세요!');
         setIsConvertingToNews(true);
@@ -356,19 +356,47 @@
         triggerToast('🎉 5줄 기사 초안이 줄별로 멋지게 완성되었습니다!');
       };
 
-      // 🌟 3단계: 맞춤법 검사기 정상 작동 로직
+      const enrichLine = (lineNum) => {
+        if (lineNum === 1) {
+          setLine1(w6.when && w6.where && w6.who ? `${w6.when} ${w6.where}에서 ${w6.who} 함께 모여 뜻깊은 활동을 시작하였다.` : '지난 날 우리 반은 교실에 모여 즐거운 활동을 본격적으로 시작했다.');
+        } else if (lineNum === 2) {
+          setLine2(w6.what && w6.how ? `${w6.what}을 주제로 삼아 ${w6.how} 과정을 거쳐 정성껏 진행했다.` : '모둠별로 역할을 나누어 맡은 바 최선을 다하며 차근차근 진행하였다.');
+        } else if (lineNum === 3) {
+          setLine3('활동이 진행되는 동안 교실 안에는 웃음꽃이 피어났고 모두가 적극적으로 참여하였다.');
+        } else if (lineNum === 4) {
+          setLine4('비록 조금 힘들기도 했지만 친구들과 서로 도우며 끝까지 해내어 큰 보람을 느꼈다.');
+        } else if (lineNum === 5) {
+          setLine5('이번 경험을 바탕으로 앞으로의 학교생활도 더욱 즐겁고 알차게 보내고 싶다.');
+        }
+        triggerToast(`✨ 줄 ${lineNum}의 문장이 풍부하게 확장되었습니다!`);
+      };
+
       const scanGrammar = () => {
-        triggerToast('🔍 맞춤법을 검사하고 있습니다...');
-        let issues = [];
-        if (draftText.includes('떡뽂이')) issues.push({ id: 'g1', errorWord: '떡뽂이', correct: '떡볶이' });
-        if (draftText.includes('맛있엇다')) issues.push({ id: 'g2', errorWord: '맛있엇다', correct: '맛있었다' });
-        if (draftText.includes('재밌엇다')) issues.push({ id: 'g3', errorWord: '재밌엇다', correct: '재미있었다' });
+        if (!draftText.trim()) return triggerToast('💡 검사할 기사 내용을 먼저 작성해 주세요!');
+        triggerToast('🔍 맞춤법을 꼼꼼히 검사하고 있습니다...');
         
+        let issues = [];
+        let text = draftText;
+
+        if (text.includes('떡뽂이')) {
+          issues.push({ id: 'g_tuck', errorWord: '떡뽂이', correct: '떡볶이' });
+        }
+        if (text.includes('맛있엇다')) {
+          issues.push({ id: 'g_taste', errorWord: '맛있엇다', correct: '맛있었다' });
+        }
+        if (text.includes('재밌엇다')) {
+          issues.push({ id: 'g_fun', errorWord: '재밌엇다', correct: '재미있었다' });
+        }
+        if (text.includes('어제는')) {
+          issues.push({ id: 'g_yesterday', errorWord: '어제는', correct: '전날에는' });
+        }
+
         if (issues.length === 0) {
-          issues.push({ id: 'g_sample', errorWord: '참 재밌엇다', correct: '참 재미있었다' });
+          triggerToast('🎉 훌륭합니다! 특별히 발견된 맞춤법 오류가 없습니다.');
+        } else {
+          triggerToast(`🔍 총 ${issues.length}개의 맞춤법 교정 대상이 발견되었습니다!`);
         }
         setGrammarIssues(issues);
-        triggerToast('🔍 맞춤법 검사 완료! 교정할 단어를 확인해보세요.');
       };
 
       const resolveIssue = (issueId, errorWord, correct) => {
@@ -377,6 +405,7 @@
         triggerToast('💮 맞춤법이 바르게 고쳐졌습니다!');
       };
 
+      // 🌟 엑셀(CSV) 다운로드 함수 (줄1~줄5 컬럼 데이터 순서 정확히 일치화)
       const downloadCSV = () => {
         const myClassData = teacherDataList.filter(row => row.targetTeacher === loggedInTeacher);
         if (myClassData.length === 0) return triggerToast('⚠️ 다운로드할 우리 반 데이터가 없습니다.');
@@ -384,7 +413,7 @@
         let csvContent = '\uFEFF응답 일시,이름,기분,한 줄 메시지,기사 주제,줄1,줄2,줄3,줄4,줄5,최종기사문\n';
         myClassData.forEach((row) => {
           const safe = (txt) => `"${(txt || '').toString().replace(/"/g, '""')}"`;
-          csvContent += `${safe(row.timestamp)},${safe(row.name)},${safe(row.mood)},${safe(row.shortMsg)},${safe(row.activityTitle)},${safe(row.sentence1)},${safe(row.sentence2)},${safe(row.sentence3)},${safe(row.sentence4)},${safe(row.draftText)}\n`;
+          csvContent += `${safe(row.timestamp)},${safe(row.name)},${safe(row.mood)},${safe(row.shortMsg)},${safe(row.activityTitle)},${safe(row.sentence1)},${safe(row.sentence2)},${safe(row.sentence3)},${safe(row.sentence4)},${safe(row.sentence5)},${safe(row.draftText)}\n`;
         });
         const url = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
         const a = document.createElement('a');
@@ -538,7 +567,6 @@
                   </div>
                 )}
 
-                {/* 🌟 2단계: 줄별 분리 미리보기 및 길게 쓰기 예시 가이드 추가 */}
                 {step === 2 && (
                   <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
                     <div className="flex justify-between items-center border-b pb-4">
@@ -566,7 +594,6 @@
                               <span>줄 1 [시작]: 언제, 어디서, 누가 무엇을 했나요?</span>
                             </div>
                             <input type="text" value={line1} onChange={(e) => setLine1(e.target.value)} placeholder="예: 어제 우리 반은 교실에서 신나는 요리 활동을 시작했다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                            <div className="text-[11px] text-slate-500 mt-1 bg-white/60 p-2 rounded-lg border border-indigo-100">💡 <strong>작성 예시:</strong> 지난 10일 우리 반은 체육관에 모여 즐거운 체육대회를 열었다.</div>
                           </div>
 
                           <div>
@@ -574,7 +601,6 @@
                               <span>줄 2 [과정]: 어떻게 진행되었나요?</span>
                             </div>
                             <input type="text" value={line2} onChange={(e) => setLine2(e.target.value)} placeholder="예: 모둠별로 재료를 손질하고 순서에 맞춰 정성껏 만들었다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                            <div className="text-[11px] text-slate-500 mt-1 bg-white/60 p-2 rounded-lg border border-indigo-100">💡 <strong>작성 예시:</strong> 친구들과 팀을 나누어 이어달리기와 피구 경기를 차례대로 진행했다.</div>
                           </div>
 
                           <div>
@@ -582,7 +608,6 @@
                               <span>줄 3 [하이라이트]: 가장 인상 깊은 장면은 무엇인가요?</span>
                             </div>
                             <input type="text" value={line3} onChange={(e) => setLine3(e.target.value)} placeholder="예: 완성된 음식을 맛보며 친구들과 환하게 웃음 지었다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                            <div className="text-[11px] text-slate-500 mt-1 bg-white/60 p-2 rounded-lg border border-indigo-100">💡 <strong>작성 예시:</strong> 마지막 줄다리기 경기에서 우리 팀이 힘을 모아 역전승을 거둘 때 가장 짜릿했다.</div>
                           </div>
 
                           <div>
@@ -590,7 +615,6 @@
                               <span>줄 4 [소감]: 새롭게 느낀 점이나 배운 점은 무엇인가요?</span>
                             </div>
                             <input type="text" value={line4} onChange={(e) => setLine4(e.target.value)} placeholder="예: 협동하는 과정의 즐거움을 깊이 깨닫게 되었다." className="w-full px-4 py-3 bg-white rounded-xl border font-bold text-sm outline-none" />
-                            <div className="text-[11px] text-slate-500 mt-1 bg-white/60 p-2 rounded-lg border border-indigo-100">💡 <strong>작성 예시:</strong> 비록 땀이 많이 났지만 친구들과 서로 응원하며 협동심을 기를 수 있어 뜻깊었다.</div>
                           </div>
 
                           <div className="bg-purple-100/70 p-4 rounded-2xl border border-purple-200 space-y-2">
@@ -603,18 +627,30 @@
                           </div>
                         </div>
                         
-                        <button onClick={combineFiveLines} className="w-full bg-slate-900 text-white font-black py-4 rounded-xl cursor-pointer shadow-md">✨ 5줄 초안 각각 한 줄씩 반영하기 👉</button>
+                        <button onClick={combineFiveLines} className="w-full bg-slate-900 text-white font-black py-4 rounded-xl cursor-pointer shadow-md">✨ 5줄 초안 각각 줄별로 반영하기 👉</button>
                       </div>
 
-                      {/* 오른쪽: 줄별로 구분되어 나타나는 초안 미리보기 */}
                       <div className="space-y-4 bg-slate-50 p-6 rounded-3xl border flex flex-col justify-between">
                         <div className="space-y-3">
-                          <span className="font-black text-sm text-slate-800">📝 완성된 5줄 기사 초안 미리보기 (줄별 확인)</span>
-                          <div className="space-y-2 max-h-[450px] overflow-y-auto pr-1">
-                            {[line1, line2, line3, line4, line5].map((l, idx) => (
-                              <div key={idx} className={`p-3 rounded-xl border text-sm font-bold ${l ? 'bg-white text-slate-800 border-indigo-200 shadow-sm' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
-                                <span className="text-xs text-indigo-600 mr-2">[줄 {idx+1}]</span>
-                                {l || '아직 작성되지 않았습니다.'}
+                          <span className="font-black text-sm text-slate-800">📝 완성된 5줄 기사 초안 미리보기 및 풍부화 도우미</span>
+                          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                            {[
+                              { label: '줄 1', val: line1, num: 1 },
+                              { label: '줄 2', val: line2, num: 2 },
+                              { label: '줄 3', val: line3, num: 3 },
+                              { label: '줄 4', val: line4, num: 4 },
+                              { label: '줄 5', val: line5, num: 5 }
+                            ].map((item, idx) => (
+                              <div key={idx} className="p-3 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="font-black text-indigo-600">[{item.label}]</span>
+                                  <button onClick={() => enrichLine(item.num)} className="text-[11px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded-lg border border-purple-200 cursor-pointer">
+                                    ✨ 더 풍부하게 다듬기
+                                  </button>
+                                </div>
+                                <p className={`text-xs font-bold ${item.val ? 'text-slate-800' : 'text-slate-400 italic'}`}>
+                                  {item.val || '아직 작성되지 않았습니다. 왼쪽에서 적어보세요!'}
+                                </p>
                               </div>
                             ))}
                           </div>
@@ -628,7 +664,6 @@
                   </div>
                 )}
 
-                {/* 🌟 3단계: 마무리 및 다듬기 (기사 말투 자동 변환 + 맞춤법 검사기 정상 작동) */}
                 {step === 3 && (
                   <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-md space-y-8">
                     <div className="flex justify-between items-center border-b pb-5">
@@ -654,7 +689,7 @@
                       <div className="bg-slate-50 p-6 rounded-3xl border space-y-4">
                         <div className="flex justify-between items-center">
                           <h3 className="font-black text-slate-900">🛠️ 글 다듬기 도구</h3>
-                          <button onClick={scanGrammar} className="bg-slate-200 text-slate-800 px-4 py-2 rounded-xl font-bold text-xs cursor-pointer">🔍 맞춤법 검사</button>
+                          <button onClick={scanGrammar} className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-xs cursor-pointer shadow">🔍 맞춤법 검사</button>
                         </div>
                         <button onClick={convertToNewsTone} disabled={isConvertingToNews} className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black py-3 rounded-xl shadow cursor-pointer">
                           {isConvertingToNews ? '변환 중...' : '📰 기사 말투로 자동 변환하기'}
@@ -668,12 +703,12 @@
                     </div>
 
                     {grammarIssues.length > 0 && (
-                      <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-2">
-                        <h4 className="text-xs font-black text-amber-800">💡 맞춤법 교정 대상</h4>
+                      <div className="bg-amber-50 p-5 rounded-2xl border border-amber-200 space-y-3">
+                        <h4 className="text-xs font-black text-amber-800">💡 맞춤법 교정 대상 목록</h4>
                         {grammarIssues.map((issue) => (
-                          <div key={issue.id} className="bg-white p-3 rounded-xl border flex justify-between items-center text-xs">
-                            <span>"{issue.errorWord}" &rarr; <strong className="text-emerald-600">{issue.correct}</strong></span>
-                            <button onClick={() => resolveIssue(issue.id, issue.errorWord, issue.correct)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer">적용하기</button>
+                          <div key={issue.id} className="bg-white p-3.5 rounded-xl border flex justify-between items-center text-xs shadow-sm">
+                            <span>본문 속 <strong>"{issue.errorWord}"</strong> &rarr; <strong className="text-emerald-600">{issue.correct}</strong> (으)로 수정</span>
+                            <button onClick={() => resolveIssue(issue.id, issue.errorWord, issue.correct)} className="bg-emerald-600 text-white px-3.5 py-2 rounded-lg font-bold cursor-pointer shadow">적용하기</button>
                           </div>
                         ))}
                       </div>
